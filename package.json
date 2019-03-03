@@ -1,0 +1,49 @@
+{
+  "name": "First",
+  "author": "Filipe Correia",
+  "version": "0.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Grookey",
+    "uuid": "ca20ee56-85eb-4e55-a51c-e781fd905362",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "basalt"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": [
+        {
+      		"type": "bitmap",
+      		"name": "GROOKEY",
+      		"file": "grookey.png"
+      	},
+        {
+          "type": "bitmap",
+          "name": "POKEBALL",
+          "file": "pokeball.png"
+        },
+        {
+          "type": "font",
+          "name": "FONT_PERFECT_DOS_48",
+          "file": "fonts/perfect-dos-vga.ttf",
+          "compatibility": "2.7"
+        },
+        {
+          "type": "font",
+          "name": "FONT_PERFECT_DOS_18",
+          "file": "fonts/perfect-dos-vga.ttf",
+          "compatibility": "2.7"
+        }
+      ]
+    }
+  }
+}
