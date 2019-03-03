@@ -1,13 +1,20 @@
 {
-  "name": "Pokemon Watchface",
+  "name": "pokemon-watchface",
   "author": "Filipe Correia",
   "version": "0.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
   "pebble": {
     "displayName": "Pokemon Watchface",
     "uuid": "ca20ee56-85eb-4e55-a51c-e781fd905362",
+    "capabilities": [
+      "configurable"
+    ],
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
@@ -17,15 +24,25 @@
       "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "pokemon"
     ],
     "resources": {
       "media": [
         {
-      		"type": "bitmap",
-      		"name": "GROOKEY",
-      		"file": "grookey.png"
-      	},
+          "type": "bitmap",
+          "name": "GROOKEY",
+          "file": "grookey.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "SCORBUNNY",
+          "file": "scorbunny.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "SOBBLE",
+          "file": "sobble.png"
+        },
         {
           "type": "bitmap",
           "name": "POKEBALL",

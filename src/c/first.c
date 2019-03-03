@@ -1,5 +1,15 @@
 #include <pebble.h>
 
+#define SETTINGS_KEY 1
+
+#define GROOKEY 0
+#define SCORBUNNY 1
+#define SOBBLE 2 
+
+typedef struct ClaySettings {
+	int pokemon;
+} __attribute__((__packed__)) ClaySettings;
+
 static Window *s_main_window;
 
 static TextLayer *s_date_layer;
@@ -11,11 +21,69 @@ static TextLayer *s_background_layer;
 static GFont s_time_font;
 static GFont s_date_font;
 
-static GBitmap *s_grookey_bitmap;
+static GBitmap *s_pokemon_bitmap;
 static GBitmap *s_pokeball_bitmap;
 
-static BitmapLayer *s_grookey_bitmap_layer;
+static BitmapLayer *s_pokemon_bitmap_layer;
 static BitmapLayer *s_pokeball_bitmap_layer;
+
+// Settings
+ClaySettings settings;
+
+static void prv_default_settings() {
+	settings.pokemon = GROOKEY;
+}
+
+static void prv_update_display() {
+
+	if (settings.pokemon == GROOKEY) {
+		text_layer_set_background_color(s_background_layer, GColorMalachite);
+		text_layer_set_text_color(s_date_layer, GColorMalachite);
+		text_layer_set_text_color(s_battery_layer, GColorMalachite);
+
+		// Create bitmap
+		s_pokemon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_GROOKEY);
+		bitmap_layer_set_bitmap(s_pokemon_bitmap_layer, s_pokemon_bitmap);
+	} else if (settings.pokemon == SCORBUNNY) {
+		text_layer_set_background_color(s_background_layer, GColorDarkCandyAppleRed);
+		text_layer_set_text_color(s_date_layer, GColorDarkCandyAppleRed);
+		text_layer_set_text_color(s_battery_layer, GColorDarkCandyAppleRed);
+
+		// Create bitmap
+		s_pokemon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SCORBUNNY);
+		bitmap_layer_set_bitmap(s_pokemon_bitmap_layer, s_pokemon_bitmap);
+	} else { // sobble
+		text_layer_set_background_color(s_background_layer, GColorBlueMoon);
+		text_layer_set_text_color(s_date_layer, GColorBlueMoon);
+		text_layer_set_text_color(s_battery_layer, GColorBlueMoon);
+		
+		// Create bitmap
+		s_pokemon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SOBBLE);
+		bitmap_layer_set_bitmap(s_pokemon_bitmap_layer, s_pokemon_bitmap);
+	}
+}
+
+static void prv_load_settings() {
+	prv_default_settings();
+
+	persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void prv_save_settings() {
+	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+
+	prv_update_display();
+}
+
+static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+	Tuple *t_pokemon = dict_find(iter, MESSAGE_KEY_pokemon);
+
+	if (t_pokemon) {
+		settings.pokemon = t_pokemon->value->uint8 - 48;
+	}
+
+	prv_save_settings();
+}
 
 static void update_time() {
 	time_t temp = time(NULL);
@@ -128,20 +196,20 @@ static void main_window_load(Window *window) {
 
 	layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
 
-	// Create Grookey bitmap
-	int GROOKEY_HEIGHT = 80;
-	int GROOKEY_WIDTH = 64;
+	// Create pokemon bitmap
+	int POKEMON_BITMAP_HEIGHT = 90;
+	int POKEMON_BITMAP_WIDTH = 72;
 	// Create bitmap
-	s_grookey_bitmap = gbitmap_create_with_resource(RESOURCE_ID_GROOKEY);
+	s_pokemon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_GROOKEY);
 
-	int grookeyY = (0.5 * bounds.size.h) - (0.5 * GROOKEY_HEIGHT);
+	int grookeyY = (0.5 * bounds.size.h) - (0.5 * POKEMON_BITMAP_HEIGHT);
 
-	s_grookey_bitmap_layer = bitmap_layer_create(GRect(3, grookeyY, GROOKEY_WIDTH, GROOKEY_HEIGHT));
-	bitmap_layer_set_compositing_mode(s_grookey_bitmap_layer, GCompOpSet);
-	bitmap_layer_set_bitmap(s_grookey_bitmap_layer, s_grookey_bitmap);
+	s_pokemon_bitmap_layer = bitmap_layer_create(GRect(3, grookeyY, POKEMON_BITMAP_WIDTH, POKEMON_BITMAP_HEIGHT));
+	bitmap_layer_set_compositing_mode(s_pokemon_bitmap_layer, GCompOpSet);
+	bitmap_layer_set_bitmap(s_pokemon_bitmap_layer, s_pokemon_bitmap);
 
 	layer_add_child(window_get_root_layer(window),
-		bitmap_layer_get_layer(s_grookey_bitmap_layer));
+		bitmap_layer_get_layer(s_pokemon_bitmap_layer));
 
 	// Create pokeball bitmap
 	int POKEBALL_HEIGHT = 25;
@@ -170,14 +238,20 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(s_time_font);
 	fonts_unload_custom_font(s_date_font);
 
-	gbitmap_destroy(s_grookey_bitmap);
-	bitmap_layer_destroy(s_grookey_bitmap_layer);
+	gbitmap_destroy(s_pokemon_bitmap);
+	bitmap_layer_destroy(s_pokemon_bitmap_layer);
 
 	gbitmap_destroy(s_pokeball_bitmap);
 	bitmap_layer_destroy(s_pokeball_bitmap_layer);
 }
 
 static void init() {
+	// Load settings
+	prv_load_settings();
+
+	// Open AppMessage connection
+	app_message_register_inbox_received(prv_inbox_received_handler);
+	app_message_open(128, 128);
 	
 	// Create main Window element and assign to pointer
 	s_main_window = window_create();
@@ -199,6 +273,7 @@ static void init() {
 }
 
 static void deinit() {
+	app_message_deregister_callbacks();
 	tick_timer_service_unsubscribe();
 	battery_state_service_unsubscribe();
 
