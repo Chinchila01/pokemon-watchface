@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "Grookey",
+    "displayName": "Pokemon Watchface",
     "uuid": "ca20ee56-85eb-4e55-a51c-e781fd905362",
     "sdkVersion": "3",
     "enableMultiJS": true,
