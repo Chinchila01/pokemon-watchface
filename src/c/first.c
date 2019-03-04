@@ -139,7 +139,7 @@ static void main_window_load(Window *window) {
 		GRect(0, backgroundY, bounds.size.w, BACKGROUND_HEIGHT)
 	);
 
-	text_layer_set_background_color(s_background_layer, GColorMalachite);
+	//text_layer_set_background_color(s_background_layer, GColorMalachite);
 	layer_add_child(window_layer, text_layer_get_layer(s_background_layer));
 
 	// Create hours layer
@@ -178,7 +178,7 @@ static void main_window_load(Window *window) {
 	);
 
 	text_layer_set_background_color(s_date_layer, GColorClear);
-	text_layer_set_text_color(s_date_layer, GColorMalachite);
+	//text_layer_set_text_color(s_date_layer, GColorMalachite);
 	text_layer_set_font(s_date_layer, s_date_font);
 	text_layer_set_text_alignment(s_date_layer, GTextAlignmentRight);
 
@@ -190,7 +190,7 @@ static void main_window_load(Window *window) {
 	);
 
 	text_layer_set_background_color(s_battery_layer, GColorClear);
-	text_layer_set_text_color(s_battery_layer, GColorMalachite);
+	//text_layer_set_text_color(s_battery_layer, GColorMalachite);
 	text_layer_set_font(s_battery_layer, s_date_font);
 	text_layer_set_text_alignment(s_battery_layer, GTextAlignmentLeft);
 
@@ -200,13 +200,11 @@ static void main_window_load(Window *window) {
 	int POKEMON_BITMAP_HEIGHT = 90;
 	int POKEMON_BITMAP_WIDTH = 72;
 	// Create bitmap
-	s_pokemon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_GROOKEY);
 
 	int grookeyY = (0.5 * bounds.size.h) - (0.5 * POKEMON_BITMAP_HEIGHT);
 
 	s_pokemon_bitmap_layer = bitmap_layer_create(GRect(3, grookeyY, POKEMON_BITMAP_WIDTH, POKEMON_BITMAP_HEIGHT));
 	bitmap_layer_set_compositing_mode(s_pokemon_bitmap_layer, GCompOpSet);
-	bitmap_layer_set_bitmap(s_pokemon_bitmap_layer, s_pokemon_bitmap);
 
 	layer_add_child(window_get_root_layer(window),
 		bitmap_layer_get_layer(s_pokemon_bitmap_layer));
@@ -226,6 +224,8 @@ static void main_window_load(Window *window) {
 
 	layer_add_child(window_get_root_layer(window),
 		bitmap_layer_get_layer(s_pokeball_bitmap_layer));
+
+	prv_update_display();
 }
 
 static void main_window_unload(Window *window) {
