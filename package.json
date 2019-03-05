@@ -44,6 +44,7 @@
           "file": "sobble.png"
         },
         {
+          "menuIcon": true,
           "type": "bitmap",
           "name": "POKEBALL",
           "file": "pokeball.png"
