@@ -34,6 +34,52 @@ module.exports = [
 		]
 	},
 	{
+		"type": "section",
+		"items": [
+			{
+				"type": "heading",
+				"defaultValue": "Timed Cycle"
+			},
+			{
+  				"type": "toggle",
+  				"messageKey": "cycle",
+  				"label": "Cycle",
+  				"defaultValue": false
+			},
+			{
+			  "type": "slider",
+			  "messageKey": "minutes_value",
+			  "defaultValue": 1,
+			  "min": 1,
+			  "max": 60,
+			  "step": 1
+			},
+			{
+			  "type": "slider",
+			  "messageKey": "hours_value",
+			  "defaultValue": 1,
+			  "min": 1,
+			  "max": 24,
+			  "step": 1
+			},
+			{
+			  "type": "select",
+			  "messageKey": "time_unit",
+			  "defaultValue": "0",
+			  "options": [
+			    { 
+			      "label": "hours", 
+			      "value": "0" 
+			    },
+			    { 
+			      "label": "minutes",
+			      "value": "1" 
+			    },
+			  ]
+			}
+		]
+	},
+	{
     	"type": "submit",
     	"defaultValue": "Save Settings"
 	}

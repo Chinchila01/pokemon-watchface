@@ -4,10 +4,17 @@
 
 #define GROOKEY 0
 #define SCORBUNNY 1
-#define SOBBLE 2 
+#define SOBBLE 2
+
+#define HOURS 0
+#define MINUTES 1
 
 typedef struct ClaySettings {
 	int pokemon;
+	bool cycle;
+	int time_unit;
+	int minutes_value;
+	int hours_value;
 } __attribute__((__packed__)) ClaySettings;
 
 static Window *s_main_window;
@@ -32,6 +39,10 @@ ClaySettings settings;
 
 static void prv_default_settings() {
 	settings.pokemon = GROOKEY;
+	settings.cycle = false;
+	settings.time_unit = HOURS;
+	settings.minutes_value = 1;
+	settings.hours_value = 1;
 }
 
 static void prv_update_display() {
@@ -76,10 +87,42 @@ static void prv_save_settings() {
 }
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+	
 	Tuple *t_pokemon = dict_find(iter, MESSAGE_KEY_pokemon);
-
 	if (t_pokemon) {
 		settings.pokemon = t_pokemon->value->uint8 - 48;
+	}
+
+	// Second Tick
+	Tuple *t_cycle = dict_find(iter, MESSAGE_KEY_cycle);
+	if (t_cycle) {
+		settings.cycle = t_cycle->value->int32 == 1;
+	}
+
+	Tuple *t_time_unit = dict_find(iter, MESSAGE_KEY_time_unit);
+	if (t_time_unit) {
+		settings.time_unit = t_time_unit->value->uint8 - 48;
+	}
+
+	Tuple *t_minutes_value = dict_find(iter, MESSAGE_KEY_minutes_value);
+	if (t_minutes_value) {
+		settings.minutes_value = t_minutes_value->value->uint8 - 48;
+	}
+	
+	Tuple *t_hours_value = dict_find(iter, MESSAGE_KEY_hours_value);
+	if (t_hours_value) {
+		settings.hours_value = t_hours_value->value->uint8 - 48;
+	}
+
+	prv_save_settings();
+}
+
+static void cycle_pokemon() {
+
+	if (settings.pokemon == SOBBLE) {
+		settings.pokemon = GROOKEY;
+	} else {
+		settings.pokemon++;
 	}
 
 	prv_save_settings();
@@ -102,6 +145,15 @@ static void update_time() {
 	text_layer_set_text(s_hour_layer, s_hour_buffer);
 	text_layer_set_text(s_minute_layer, s_minute_buffer);
 	text_layer_set_text(s_date_layer, s_date_buffer);
+
+	if (settings.cycle) {
+
+		if (settings.time_unit == HOURS && (tick_time->hour % settings.hours_value) == 0) {
+			cycle_pokemon();
+		} else if (settings.time_unit == MINUTES && (tick_time->minute % settings.hours_value) == 0) {
+			cycle_pokemon();
+		}
+	}
 }
 
 static void battery_state_handler(BatteryChargeState charge) {
