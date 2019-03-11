@@ -7,20 +7,24 @@ module.exports = function(minified) {
   function setSliderRange() {
     
     var value = this.get();
-    if (value && value === '1') {
-      clayConfig.getItemByMessageKey('hours_time').hide();
-      clayConfig.getItemByMessageKey('minutes_time').show();
-    } else {
-      clayConfig.getItemByMessageKey('minutes_time').hide();
-      clayConfig.getItemByMessageKey('hours_time').show();
+    var hoursItem = clayConfig.getItemByMessageKey('hours_value');
+    var minutesItem = clayConfig.getItemByMessageKey('minutes_value');
+    if (value && value === '1') { // Changed to minutes
+
+      minutesItem.set(hoursItem.get());
+      hoursItem.hide();
+      minutesItem.show();
+    } else { // Changed to hours
+      hoursItem.set((minutesItem.get() > 24) ? 24 : minutesItem.get());
+      minutesItem.hide();
+      hoursItem.show();
     }
   }
 
   clayConfig.on(clayConfig.EVENTS.AFTER_BUILD, function() {
-    clayConfig.getItemByMessageKey('minutes_time').hide();
     var timeUnit = clayConfig.getItemByMessageKey('time_unit');
     setSliderRange.call(timeUnit);
-    timeUnit.on( 'change', setSliderRange);
+    timeUnit.on('change', setSliderRange);
   });
   
 };

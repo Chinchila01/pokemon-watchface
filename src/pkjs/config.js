@@ -49,7 +49,7 @@ module.exports = [
 			{
 			  "type": "slider",
 			  "messageKey": "minutes_value",
-			  "defaultValue": 1,
+			  "defaultValue": 0,
 			  "min": 1,
 			  "max": 60,
 			  "step": 1
@@ -57,7 +57,7 @@ module.exports = [
 			{
 			  "type": "slider",
 			  "messageKey": "hours_value",
-			  "defaultValue": 1,
+			  "defaultValue": 0,
 			  "min": 1,
 			  "max": 24,
 			  "step": 1
