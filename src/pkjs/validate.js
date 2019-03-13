@@ -3,6 +3,7 @@ module.exports = function(minified) {
   var _ = minified._;
   var $ = minified.$;
   var HTML = minified.HTML;
+  var initialized = false;
 
   function setSliderRange() {
     
@@ -11,14 +12,20 @@ module.exports = function(minified) {
     var minutesItem = clayConfig.getItemByMessageKey('minutes_value');
     if (value && value === '1') { // Changed to minutes
 
-      minutesItem.set(hoursItem.get());
+      if (initialized) {
+        minutesItem.set(hoursItem.get());
+      }
       hoursItem.hide();
       minutesItem.show();
     } else { // Changed to hours
-      hoursItem.set((minutesItem.get() > 24) ? 24 : minutesItem.get());
+      if (initialized) {
+        hoursItem.set((minutesItem.get() > 24) ? 24 : minutesItem.get());
+      }
       minutesItem.hide();
       hoursItem.show();
     }
+
+    initialized = true;
   }
 
   clayConfig.on(clayConfig.EVENTS.AFTER_BUILD, function() {
