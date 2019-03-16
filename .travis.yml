@@ -1,0 +1,13 @@
+language: python
+dist: "trusty"
+addons:
+  apt:
+    packages:
+      - "python-pip"
+      - "python2.7-dev"
+install:
+  - ./install-pebble-sdk.sh
+  - export PATH=$PATH:$PWD/pebble-sdk-4.5-linux64/bin/
+  - ./install-pebble-sdk-2.sh
+
+script: ./build.sh
