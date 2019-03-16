@@ -24,7 +24,11 @@
       "watchface": true
     },
     "messageKeys": [
-      "pokemon"
+      "pokemon",
+      "cycle",
+      "time_unit",
+      "minutes_value",
+      "hours_value"
     ],
     "resources": {
       "media": [

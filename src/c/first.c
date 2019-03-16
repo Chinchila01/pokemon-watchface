@@ -4,10 +4,19 @@
 
 #define GROOKEY 0
 #define SCORBUNNY 1
-#define SOBBLE 2 
+#define SOBBLE 2
+
+#define HOURS 0
+#define MINUTES 1
 
 typedef struct ClaySettings {
 	int pokemon;
+	bool cycle;
+	int time_unit;
+	int minutes_value;
+	int last_change_minute;
+	int hours_value;
+	int last_change_hour;
 } __attribute__((__packed__)) ClaySettings;
 
 static Window *s_main_window;
@@ -27,11 +36,20 @@ static GBitmap *s_pokeball_bitmap;
 static BitmapLayer *s_pokemon_bitmap_layer;
 static BitmapLayer *s_pokeball_bitmap_layer;
 
+static int last_change_minute;
+static int last_change_hour;
+
 // Settings
 ClaySettings settings;
 
 static void prv_default_settings() {
 	settings.pokemon = GROOKEY;
+	settings.cycle = false;
+	settings.time_unit = HOURS;
+	settings.minutes_value = 1;
+	settings.last_change_minute = 0;
+	settings.hours_value = 1;
+	settings.last_change_hour = 0;
 }
 
 static void prv_update_display() {
@@ -76,13 +94,46 @@ static void prv_save_settings() {
 }
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+	time_t temp = time(NULL);
+	struct tm *tick_time = localtime(&temp);
+	
 	Tuple *t_pokemon = dict_find(iter, MESSAGE_KEY_pokemon);
-
 	if (t_pokemon) {
 		settings.pokemon = t_pokemon->value->uint8 - 48;
 	}
 
+	Tuple *t_cycle = dict_find(iter, MESSAGE_KEY_cycle);
+	if (t_cycle) {
+		settings.cycle = t_cycle->value->int32 == 1;
+	}
+
+	Tuple *t_time_unit = dict_find(iter, MESSAGE_KEY_time_unit);
+	if (t_time_unit) {
+		settings.time_unit = t_time_unit->value->uint8 - 48;
+	}
+
+	Tuple *t_minutes_value = dict_find(iter, MESSAGE_KEY_minutes_value);
+	if (t_minutes_value) {
+		settings.minutes_value = t_minutes_value->value->uint8;
+		settings.last_change_minute = tick_time->tm_min;
+	}
+	
+	Tuple *t_hours_value = dict_find(iter, MESSAGE_KEY_hours_value);
+	if (t_hours_value) {
+		settings.hours_value = t_hours_value->value->uint8;
+		settings.last_change_hour = tick_time->tm_hour;
+	}
+
 	prv_save_settings();
+}
+
+static void cycle_pokemon() {
+
+	if (settings.pokemon == SOBBLE) {
+		settings.pokemon = GROOKEY;
+	} else {
+		settings.pokemon++;
+	}
 }
 
 static void update_time() {
@@ -102,6 +153,29 @@ static void update_time() {
 	text_layer_set_text(s_hour_layer, s_hour_buffer);
 	text_layer_set_text(s_minute_layer, s_minute_buffer);
 	text_layer_set_text(s_date_layer, s_date_buffer);
+
+	if (settings.cycle) {
+
+		if (settings.time_unit == HOURS) {
+			int value_to_compare = settings.last_change_hour >= (24 - settings.hours_value) ?
+				(settings.last_change_hour - 24) : settings.last_change_hour;
+			
+			if ((tick_time->tm_hour - value_to_compare) == settings.hours_value) {
+				settings.last_change_hour = tick_time->tm_hour;
+				cycle_pokemon();
+				prv_save_settings();
+			}
+		} else if (settings.time_unit == MINUTES) {
+			int value_to_compare = settings.last_change_minute >= (60 - settings.minutes_value) ?
+				(settings.last_change_minute - 60) : settings.last_change_minute;
+			
+			if ((tick_time->tm_min - settings.last_change_minute) == settings.minutes_value) {
+				settings.last_change_minute = tick_time->tm_min;
+				cycle_pokemon();
+				prv_save_settings();
+			}
+		}
+	}
 }
 
 static void battery_state_handler(BatteryChargeState charge) {
