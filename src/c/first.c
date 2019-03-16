@@ -36,9 +36,6 @@ static GBitmap *s_pokeball_bitmap;
 static BitmapLayer *s_pokemon_bitmap_layer;
 static BitmapLayer *s_pokeball_bitmap_layer;
 
-static int last_change_minute;
-static int last_change_hour;
-
 // Settings
 ClaySettings settings;
 
@@ -169,7 +166,7 @@ static void update_time() {
 			int value_to_compare = settings.last_change_minute >= (60 - settings.minutes_value) ?
 				(settings.last_change_minute - 60) : settings.last_change_minute;
 			
-			if ((tick_time->tm_min - settings.last_change_minute) == settings.minutes_value) {
+			if ((tick_time->tm_min - value_to_compare) == settings.minutes_value) {
 				settings.last_change_minute = tick_time->tm_min;
 				cycle_pokemon();
 				prv_save_settings();
@@ -196,8 +193,8 @@ static void main_window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
 
-	int WINDOW_WIDTH = 144;
-	int WINDOW_HEIGHT = 168;
+	int WINDOW_WIDTH = bounds.size.w;
+	int WINDOW_HEIGHT = bounds.size.h;
 	int TIME_FONT_WIDTH = 36;
 	int TIME_FONT_HEIGHT = 48;
 
@@ -246,21 +243,24 @@ static void main_window_load(Window *window) {
 
 	layer_add_child(window_layer, text_layer_get_layer(s_minute_layer));
 
+	int extraInfoLayerX = PBL_IF_ROUND_ELSE(bounds.size.w / 2, 0);
+	int extraInfoLayerY = PBL_IF_ROUND_ELSE(backgroundY - 20, 0);
+
 	// Create date layer
 	s_date_layer = text_layer_create(
-		GRect(0, 0, bounds.size.w, 18)
+		GRect(extraInfoLayerX, extraInfoLayerY, bounds.size.w, 18)
 	);
 
 	text_layer_set_background_color(s_date_layer, GColorClear);
 	//text_layer_set_text_color(s_date_layer, GColorMalachite);
 	text_layer_set_font(s_date_layer, s_date_font);
-	text_layer_set_text_alignment(s_date_layer, GTextAlignmentRight);
+	text_layer_set_text_alignment(s_date_layer, PBL_IF_ROUND_ELSE(GTextAlignmentLeft, GTextAlignmentRight));
 
 	layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
 
 	// Create battery layer
 	s_battery_layer = text_layer_create(
-		GRect(0, 0, bounds.size.w, 18)
+		GRect(extraInfoLayerX - 64, extraInfoLayerY, bounds.size.w, 18)
 	);
 
 	text_layer_set_background_color(s_battery_layer, GColorClear);
@@ -277,7 +277,8 @@ static void main_window_load(Window *window) {
 
 	int grookeyY = (0.5 * bounds.size.h) - (0.5 * POKEMON_BITMAP_HEIGHT);
 
-	s_pokemon_bitmap_layer = bitmap_layer_create(GRect(3, grookeyY, POKEMON_BITMAP_WIDTH, POKEMON_BITMAP_HEIGHT));
+	s_pokemon_bitmap_layer = bitmap_layer_create(GRect(PBL_IF_ROUND_ELSE((0.5 * bounds.size.w) - POKEMON_BITMAP_WIDTH, 3),
+	 grookeyY, POKEMON_BITMAP_WIDTH, POKEMON_BITMAP_HEIGHT));
 	bitmap_layer_set_compositing_mode(s_pokemon_bitmap_layer, GCompOpSet);
 
 	layer_add_child(window_get_root_layer(window),
